@@ -51,12 +51,14 @@ The project and app display names are NOMA.
   and clears; checked once at launch, not on every return to the
   foreground — easy to tighten later if you want that.
 - **Home screen**: any pinned notes appear first, above your list of
-  projects, both searchable (`Search notes and projects`). Each project
+  projects. Home search finds all active notes by title or body, including
+  unpinned notes, alongside matching project names (`Search notes and projects`).
+  Each note result shows its project and opens directly in the editor. Each project
   row shows how many notes in it are still active, plus a small icon
   chip you choose when creating it. Pinned notes are capped at 4 by
   default with a "+N more pinned" expander, so a growing pinned list
-  doesn't take over the home screen — search bypasses the cap and shows
-  every match.
+  doesn't take over the home screen. Search shows every matching active note
+  once in a separate Notes section; archived notes stay in the project Archive.
 - **Projects**: the top-level container. Create as many as you like,
   each with a name and an icon picked from a small curated set (folder,
   briefcase, wrench, house, sun, and a few others); every row and header
@@ -173,3 +175,10 @@ Cancel leaves the project unchanged. On the home screen, swipe left on a project
 or long-press it for Edit and Delete actions. Delete Project is also available
 in the edit screen and always asks for confirmation. Deleting removes the project
 and all its active and archived notes and attachments permanently.
+
+## Moving notes
+
+Open a note and tap **Move** in its Project section, then choose another project.
+The original note moves without copying it: text, photos, audio, documents, dates,
+pin, and completion status are retained. Cancel leaves it in its current project.
+Save or discard any unsaved audio recording before moving a note.

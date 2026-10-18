@@ -45,6 +45,28 @@ final class Note {
         documents.filter(\.isAudio).sorted { $0.sortOrder < $1.sortOrder }
     }
 
+    /// Search active notes by their text, including notes that aren't pinned.
+    func matchesSearch(_ text: String) -> Bool {
+        let query = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        return !isArchived && !query.isEmpty && (
+            title.localizedCaseInsensitiveContains(query) ||
+            body.localizedCaseInsensitiveContains(query)
+        )
+    }
+
+    /// Reassign the existing note; inverse relationships update both project lists.
+    func move(to destination: Project, in context: ModelContext) throws {
+        guard project?.persistentModelID != destination.persistentModelID else { return }
+        let original = project
+        project = destination
+        do {
+            try context.save()
+        } catch {
+            project = original
+            throw error
+        }
+    }
+
     /// Ticking a note marks it done and archives it in one step; there is no
     /// separate "complete" vs "archive" state for the user to think about.
     func toggleComplete() {

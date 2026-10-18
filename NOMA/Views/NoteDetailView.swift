@@ -12,6 +12,7 @@ struct NoteDetailView: View {
 
     @Environment(\.scenePhase) private var scenePhase
     @StateObject private var audio = NoteAudioController()
+    @State private var showingMoveProject = false
     @State private var showingLeaveAudioAlert = false
 
     @State private var selectedPhotoItems: [PhotosPickerItem] = []
@@ -22,85 +23,7 @@ struct NoteDetailView: View {
     @State private var showingCameraUnavailableAlert = false
 
     var body: some View {
-        Form {
-                Section {
-                    TextField("Title", text: $note.title)
-                        .font(.title3.bold())
-                        .fontDesign(.rounded)
-                    TextField("Note", text: $note.body, axis: .vertical)
-                        .lineLimit(5...20)
-                }
-
-                Section {
-                    Button(action: toggleComplete) {
-                        HStack {
-                            Image(systemName: note.isDone ? "checkmark.circle.fill" : "circle")
-                                .foregroundStyle(note.isDone ? Color.coral : Color.secondary)
-                            Text(note.isDone ? "Completed" : "Mark Complete")
-                                .foregroundStyle(.primary)
-                            Spacer()
-                        }
-                    }
-                    Button {
-                        note.isPinned.toggle()
-                    } label: {
-                        HStack {
-                            Image(systemName: note.isPinned ? "pin.fill" : "pin")
-                                .foregroundStyle(note.isPinned ? Color.coral : Color.secondary)
-                            Text(note.isPinned ? "Pinned" : "Pin to Home")
-                                .foregroundStyle(.primary)
-                            Spacer()
-                        }
-                    }
-                }
-
-                NoteAudioSection(note: note, audio: audio)
-
-                Section("Photos") {
-                    imageGrid
-                    HStack {
-                        PhotosPicker(selection: $selectedPhotoItems, matching: .images) {
-                            Label("Library", systemImage: "photo.on.rectangle.angled")
-                        }
-                        .buttonStyle(.plain)
-                        Spacer()
-                        Button {
-                            if UIImagePickerController.isSourceTypeAvailable(.camera) {
-                                showingCamera = true
-                            } else {
-                                showingCameraUnavailableAlert = true
-                            }
-                        } label: {
-                            Label("Camera", systemImage: "camera.fill")
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-
-                Section("Documents") {
-                    ForEach(note.sortedDocuments) { document in
-                        DocumentRowView(document: document)
-                            .contentShape(Rectangle())
-                            .onTapGesture { previewURL = document.writeToTemporaryURL() }
-                    }
-                    .onDelete(perform: deleteDocuments)
-
-                    Button {
-                        showingDocumentImporter = true
-                    } label: {
-                        Label("Add Document", systemImage: "doc.badge.plus")
-                    }
-                }
-
-                Section {
-                    LabeledContent("Created", value: note.createdAt.formatted(date: .abbreviated, time: .shortened))
-                    if let completedAt = note.completedAt {
-                        LabeledContent("Completed", value: completedAt.formatted(date: .abbreviated, time: .shortened))
-                    }
-                }
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            }
+        noteForm
             .navigationTitle("Note")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -165,10 +88,115 @@ struct NoteDetailView: View {
             } message: {
                 Text("This device doesn't have a camera available.")
             }
+            .sheet(isPresented: $showingMoveProject) {
+                MoveNoteView(note: note)
+            }
             .sheet(isPresented: isShowingPreview) {
                 if let previewURL {
                     DocumentPreviewView(url: previewURL)
                 }
+            }
+    }
+
+    private var noteForm: some View {
+        Form {
+                Section {
+                    TextField("Title", text: $note.title)
+                        .font(.title3.bold())
+                        .fontDesign(.rounded)
+                    TextField("Note", text: $note.body, axis: .vertical)
+                        .lineLimit(5...20)
+                }
+
+                Section {
+                    Button(action: toggleComplete) {
+                        HStack {
+                            Image(systemName: note.isDone ? "checkmark.circle.fill" : "circle")
+                                .foregroundStyle(note.isDone ? Color.coral : Color.secondary)
+                            Text(note.isDone ? "Completed" : "Mark Complete")
+                                .foregroundStyle(.primary)
+                            Spacer()
+                        }
+                    }
+                    Button {
+                        note.isPinned.toggle()
+                    } label: {
+                        HStack {
+                            Image(systemName: note.isPinned ? "pin.fill" : "pin")
+                                .foregroundStyle(note.isPinned ? Color.coral : Color.secondary)
+                            Text(note.isPinned ? "Pinned" : "Pin to Home")
+                                .foregroundStyle(.primary)
+                            Spacer()
+                        }
+                    }
+                }
+
+                Section("Project") {
+                    Button {
+                        audio.stopPlayback()
+                        showingMoveProject = true
+                    } label: {
+                        HStack {
+                            Label(note.project?.name ?? "No project", systemImage: note.project?.icon ?? "folder")
+                                .foregroundStyle(.primary)
+                            Spacer()
+                            Text("Move")
+                                .foregroundStyle(Color.coral)
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .accessibilityLabel("Move to Project. Current project: \(note.project?.name ?? "None")")
+                    .disabled(audio.isRecording || audio.draftURL != nil || audio.isRequestingPermission)
+                }
+
+                NoteAudioSection(note: note, audio: audio)
+
+                Section("Photos") {
+                    imageGrid
+                    HStack {
+                        PhotosPicker(selection: $selectedPhotoItems, matching: .images) {
+                            Label("Library", systemImage: "photo.on.rectangle.angled")
+                        }
+                        .buttonStyle(.plain)
+                        Spacer()
+                        Button {
+                            if UIImagePickerController.isSourceTypeAvailable(.camera) {
+                                showingCamera = true
+                            } else {
+                                showingCameraUnavailableAlert = true
+                            }
+                        } label: {
+                            Label("Camera", systemImage: "camera.fill")
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+
+                Section("Documents") {
+                    ForEach(note.sortedDocuments) { document in
+                        DocumentRowView(document: document)
+                            .contentShape(Rectangle())
+                            .onTapGesture { previewURL = document.writeToTemporaryURL() }
+                    }
+                    .onDelete(perform: deleteDocuments)
+
+                    Button {
+                        showingDocumentImporter = true
+                    } label: {
+                        Label("Add Document", systemImage: "doc.badge.plus")
+                    }
+                }
+
+                Section {
+                    LabeledContent("Created", value: note.createdAt.formatted(date: .abbreviated, time: .shortened))
+                    if let completedAt = note.completedAt {
+                        LabeledContent("Completed", value: completedAt.formatted(date: .abbreviated, time: .shortened))
+                    }
+                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
             }
     }
 

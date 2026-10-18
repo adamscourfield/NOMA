@@ -5,8 +5,8 @@ struct HomeView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Project.createdAt, order: .reverse)
     private var projects: [Project]
-    @Query(filter: #Predicate<Note> { $0.isPinned && !$0.isArchived }, sort: \Note.createdAt, order: .reverse)
-    private var pinnedNotes: [Note]
+    @Query(filter: #Predicate<Note> { !$0.isArchived }, sort: \Note.createdAt, order: .reverse)
+    private var activeNotes: [Note]
 
     @State private var projectToEdit: Project?
     @State private var projectToDelete: Project?
@@ -15,36 +15,34 @@ struct HomeView: View {
     @State private var showAllPinned = false
     @State private var searchText = ""
 
-    private var filteredPinnedNotes: [Note] {
-        guard !searchText.isEmpty else { return pinnedNotes }
-        return pinnedNotes.filter {
-            $0.title.localizedCaseInsensitiveContains(searchText) ||
-            $0.body.localizedCaseInsensitiveContains(searchText)
-        }
-    }
-
+    private var query: String { searchText.trimmingCharacters(in: .whitespacesAndNewlines) }
+    private var pinnedNotes: [Note] { activeNotes.filter(\.isPinned) }
+    private var matchingNotes: [Note] { activeNotes.filter { $0.matchesSearch(query) } }
     private var visiblePinnedNotes: [Note] {
-        guard searchText.isEmpty, !showAllPinned else { return filteredPinnedNotes }
-        return Array(filteredPinnedNotes.prefix(4))
+        showAllPinned ? pinnedNotes : Array(pinnedNotes.prefix(4))
     }
-
-    private var morePinnedCount: Int {
-        filteredPinnedNotes.count - visiblePinnedNotes.count
-    }
-
+    private var morePinnedCount: Int { pinnedNotes.count - visiblePinnedNotes.count }
     private var filteredProjects: [Project] {
-        guard !searchText.isEmpty else { return projects }
-        return projects.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
+        query.isEmpty ? projects : projects.filter { $0.name.localizedCaseInsensitiveContains(query) }
     }
-
     private var noResults: Bool {
-        !searchText.isEmpty && filteredPinnedNotes.isEmpty && filteredProjects.isEmpty
+        !query.isEmpty && matchingNotes.isEmpty && filteredProjects.isEmpty
     }
 
     var body: some View {
         NavigationStack {
             List {
-                if !visiblePinnedNotes.isEmpty {
+                if !query.isEmpty && !matchingNotes.isEmpty {
+                    Section("Notes") {
+                        ForEach(matchingNotes) { note in
+                            NavigationLink(value: note) {
+                                SearchNoteRow(note: note)
+                            }
+                        }
+                    }
+                }
+
+                if query.isEmpty && !visiblePinnedNotes.isEmpty {
                     Section("Pinned") {
                         ForEach(visiblePinnedNotes) { note in
                             NavigationLink(value: note) {
@@ -148,4 +146,34 @@ struct HomeView: View {
         }
     }
 
+}
+
+private struct SearchNoteRow: View {
+    let note: Note
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            HStack {
+                Text(note.title.isEmpty ? "Untitled" : note.title)
+                    .font(.subheadline.weight(.semibold))
+                    .lineLimit(1)
+                if note.isPinned {
+                    Image(systemName: "pin.fill")
+                        .font(.caption2)
+                        .foregroundStyle(Color.coral)
+                }
+            }
+            if !note.body.isEmpty {
+                Text(note.body)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+            }
+            Label(note.project?.name ?? "No project", systemImage: note.project?.icon ?? "folder")
+                .font(.caption)
+                .foregroundStyle(Color.coral)
+                .lineLimit(1)
+        }
+        .padding(.vertical, 3)
+    }
 }
