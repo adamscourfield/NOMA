@@ -5,6 +5,9 @@ import UIKit
 struct ProjectDetailView: View {
     @Bindable var project: Project
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
+    @State private var showingProjectEditor = false
+    @State private var deleteProjectAfterEditing = false
     @State private var noteToEdit: Note?
     @State private var completingNoteIDs: Set<PersistentIdentifier> = []
     @State private var searchText = ""
@@ -59,6 +62,11 @@ struct ProjectDetailView: View {
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
+                Button {
+                    showingProjectEditor = true
+                } label: {
+                    Label("Edit Project", systemImage: "pencil")
+                }
                 NavigationLink {
                     ArchiveView(project: project)
                 } label: {
@@ -68,6 +76,15 @@ struct ProjectDetailView: View {
                     Label("New Note", systemImage: "plus")
                 }
             }
+        }
+        .sheet(isPresented: $showingProjectEditor, onDismiss: {
+            if deleteProjectAfterEditing {
+                deleteProjectAfterEditing = false
+                dismiss()
+                modelContext.delete(project)
+            }
+        }) {
+            EditProjectView(project: project) { deleteProjectAfterEditing = true }
         }
         .sheet(item: $noteToEdit, onDismiss: pruneEmptyNotes) { note in
             NavigationStack {
@@ -85,6 +102,7 @@ struct ProjectDetailView: View {
             completingNoteIDs.insert(note.persistentModelID)
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.42) {
+            guard note.modelContext != nil else { return }
             withAnimation(.easeInOut(duration: 0.25)) {
                 note.toggleComplete()
                 completingNoteIDs.remove(note.persistentModelID)

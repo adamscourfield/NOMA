@@ -101,8 +101,7 @@ The project and app display names are NOMA.
 - No sharing, collaboration, or export — single-user by design.
 - No live connection to Google Drive — picking a Drive file copies it in
   once; the note won't reflect later edits made to the original in Drive.
-- No renaming a project after creation, and no reordering projects —
-  straightforward to add if you find you want it.
+- No manual reordering of projects.
 - No syncing NOMA between devices (e.g. an iPhone and a Mac build) —
   that would mean either CloudKit (which needs a paid Apple Developer
   account) or building a real local-network sync protocol ourselves;
@@ -166,3 +165,11 @@ audio attachment save/read/rename/archive/delete operations preserve its content
 ```sh
 xcrun swift Branding/render-icon.swift NOMA/Resources/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png
 ```
+
+## Managing projects
+
+Open a project and tap the pencil to edit its name and icon. Save applies changes;
+Cancel leaves the project unchanged. On the home screen, swipe left on a project
+or long-press it for Edit and Delete actions. Delete Project is also available
+in the edit screen and always asks for confirmation. Deleting removes the project
+and all its active and archived notes and attachments permanently.

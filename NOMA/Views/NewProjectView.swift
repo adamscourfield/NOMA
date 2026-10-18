@@ -9,8 +9,6 @@ struct NewProjectView: View {
     @State private var selectedIcon = ProjectIcon.choices[0]
     @FocusState private var nameFieldFocused: Bool
 
-    private let columns = Array(repeating: GridItem(.flexible(), spacing: 14), count: 5)
-
     var body: some View {
         NavigationStack {
             Form {
@@ -20,24 +18,7 @@ struct NewProjectView: View {
                 }
 
                 Section("Icon") {
-                    LazyVGrid(columns: columns, spacing: 14) {
-                        ForEach(ProjectIcon.choices, id: \.self) { icon in
-                            Button {
-                                selectedIcon = icon
-                            } label: {
-                                ZStack {
-                                    Circle()
-                                        .fill(selectedIcon == icon ? Color.coral : Color.coral.opacity(0.12))
-                                        .frame(width: 44, height: 44)
-                                    Image(systemName: icon)
-                                        .font(.system(size: 18, weight: .medium))
-                                        .foregroundStyle(selectedIcon == icon ? .white : Color.coral)
-                                }
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
-                    .padding(.vertical, 6)
+                    ProjectIconPicker(selectedIcon: $selectedIcon)
                 }
             }
             .navigationTitle("New Project")

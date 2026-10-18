@@ -8,6 +8,9 @@ struct HomeView: View {
     @Query(filter: #Predicate<Note> { $0.isPinned && !$0.isArchived }, sort: \Note.createdAt, order: .reverse)
     private var pinnedNotes: [Note]
 
+    @State private var projectToEdit: Project?
+    @State private var projectToDelete: Project?
+    @State private var deleteAfterEditing: Project?
     @State private var showingNewProject = false
     @State private var showAllPinned = false
     @State private var searchText = ""
@@ -64,8 +67,26 @@ struct HomeView: View {
                             NavigationLink(value: project) {
                                 ProjectRowView(project: project)
                             }
+                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                Button(role: .destructive) {
+                                    projectToDelete = project
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
+                                Button { projectToEdit = project } label: {
+                                    Label("Edit", systemImage: "pencil")
+                                }
+                                .tint(Color.coral)
+                            }
+                            .contextMenu {
+                                Button { projectToEdit = project } label: {
+                                    Label("Edit Project", systemImage: "pencil")
+                                }
+                                Button(role: .destructive) { projectToDelete = project } label: {
+                                    Label("Delete Project", systemImage: "trash")
+                                }
+                            }
                         }
-                        .onDelete(perform: deleteProjects)
                     }
                 }
 
@@ -101,15 +122,30 @@ struct HomeView: View {
                     )
                 }
             }
+            .sheet(item: $projectToEdit, onDismiss: {
+                if let project = deleteAfterEditing {
+                    deleteAfterEditing = nil
+                    modelContext.delete(project)
+                }
+            }) { project in
+                EditProjectView(project: project) { deleteAfterEditing = project }
+            }
+            .alert("Delete this project?", isPresented: Binding(
+                get: { projectToDelete != nil },
+                set: { if !$0 { projectToDelete = nil } }
+            )) {
+                Button("Delete Project", role: .destructive) {
+                    if let project = projectToDelete { modelContext.delete(project) }
+                    projectToDelete = nil
+                }
+                Button("Cancel", role: .cancel) { projectToDelete = nil }
+            } message: {
+                Text("“\(projectToDelete?.name ?? "This project")” and all its active and archived notes, photos, audio, and documents will be permanently deleted. This cannot be undone.")
+            }
             .sheet(isPresented: $showingNewProject) {
                 NewProjectView()
             }
         }
     }
 
-    private func deleteProjects(at offsets: IndexSet) {
-        for index in offsets {
-            modelContext.delete(filteredProjects[index])
-        }
-    }
 }
