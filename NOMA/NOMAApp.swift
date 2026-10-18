@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftData
 
 @main
-struct CrankApp: App {
+struct NOMAApp: App {
     @State private var isUnlocked = false
 
     var sharedModelContainer: ModelContainer = {

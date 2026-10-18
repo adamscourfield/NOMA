@@ -15,7 +15,7 @@ struct LockScreenView: View {
         case passcode
     }
 
-    private let wordmark = Array("CRANK")
+    private let wordmark = Array("NOMA")
     private let keypadRows: [[String]] = [
         ["1", "2", "3"],
         ["4", "5", "6"],
@@ -24,7 +24,7 @@ struct LockScreenView: View {
     ]
 
     @State private var phase: Phase = .ident
-    @State private var lettersVisible: [Bool] = Array(repeating: false, count: 5)
+    @State private var lettersVisible: [Bool] = Array(repeating: false, count: 4)
     @State private var underlineWidth: CGFloat = 0
     @State private var identOpacity: Double = 1
 
@@ -70,7 +70,7 @@ struct LockScreenView: View {
     private var passcodeView: some View {
         VStack(spacing: 40) {
             VStack(spacing: 20) {
-                Text("CRANK")
+                Text("NOMA")
                     .font(.system(size: 22, weight: .bold, design: .rounded))
                     .tracking(5)
                     .foregroundStyle(.secondary)

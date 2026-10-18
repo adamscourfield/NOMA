@@ -76,7 +76,7 @@ struct HomeView: View {
             }
             .listStyle(.insetGrouped)
             .searchable(text: $searchText, prompt: "Search notes and projects")
-            .navigationTitle("CRANK")
+            .navigationTitle("NOMA")
             .navigationDestination(for: Project.self) { project in
                 ProjectDetailView(project: project)
             }

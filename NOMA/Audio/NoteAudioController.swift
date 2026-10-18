@@ -34,7 +34,7 @@ final class NoteAudioController: NSObject, ObservableObject, AVAudioRecorderDele
         guard permissionRequest == request else { return }
         isRequestingPermission = false
         guard allowed else {
-            errorMessage = "Microphone access is off. Enable it for CRANK in Settings to record audio."
+            errorMessage = "Microphone access is off. Enable it for NOMA in Settings to record audio."
             return
         }
         let url = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".m4a")

@@ -1,4 +1,6 @@
-# CRANK
+# NOMA
+
+<img src="NOMA/Resources/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png" width="128" alt="NOMA coral N app icon">
 
 A personal, local-only project and notes app for iPhone: projects contain
 tick-box notes, pinned notes surface on the home screen, and notes can hold
@@ -6,12 +8,13 @@ photos and documents (including from Google Drive) — all locked behind
 a 4-digit passcode, styled monochrome with coral accents. No accounts, no
 sync, no third party, nobody else's eyes on it but yours.
 
-This repo contains Swift source files only, not an `.xcodeproj`. Xcode's
-own "New Project" wizard generates a more reliable project file than a
-hand-written one, so you'll create the project shell in Xcode and drop
-these files in. Takes about 5 minutes.
+Open `NOMA.xcodeproj` in Xcode to build the app. The `NOMA/` folder contains
+its SwiftUI source and assets. NOMA was previously called CRANK.
 
 ## Requirements
+
+The included Xcode project targets iOS 26.5 and uses Xcode 26.5. The source
+uses iOS 17-era APIs; creating a separate project lets you choose an older target.
 
 - A Mac with Xcode 15 or later (free from the Mac App Store)
 - An iPhone running iOS 17 or later
@@ -21,69 +24,23 @@ these files in. Takes about 5 minutes.
 
 ## Setup
 
-If you already have a Crank Xcode project from an earlier version of
-this README and it's gotten into a confusing state (stray files,
-duplicate `@main`, asset catalog errors), the fastest way forward is
-a clean restart: in Finder, trash the whole project folder you
-created on your Mac, then follow these steps fresh. Nothing here
-touches this git repo, only the separate Xcode project folder you
-built from it.
+1. Open `NOMA.xcodeproj` in Xcode.
+2. Select the NOMA target and set your signing team under Signing & Capabilities.
+3. Choose your connected iPhone and Run (⌘R).
 
-1. **Create the project.** Xcode → File → New → Project → iOS → App.
-   - Product Name: `Crank`
-   - Interface: SwiftUI
-   - Storage: SwiftData
-   - Uncheck "Include Tests" (optional)
-   - Save it wherever you like on your Mac (this can be outside the git repo).
+The project includes camera and microphone usage descriptions. If creating a
+separate project from source, include both `NSCameraUsageDescription` and
+`NSMicrophoneUsageDescription` before using those features.
 
-2. **Remove the generated defaults.** Delete the template's `Item.swift`,
-   `ContentView.swift`, and its own `CrankApp.swift` — you're replacing all
-   three with the ones in this repo. (Deleting the app file will show
-   build errors until step 3 — that's expected.)
-
-3. **Add the source files.** In Finder, drag the contents of this repo's
-   `Crank/` folder (`CrankApp.swift`, `Models/`, `Views/`, `Theme/` —
-   **not** `Resources/`, that's step 4) into your Xcode project's `Crank`
-   group. Choose "Copy items if needed" and make sure the `Crank` target
-   is checked.
-
-4. **Replace the asset catalog.** In Xcode's navigator, delete the
-   template's own `Assets.xcassets` (Delete → Move to Trash — it's just
-   the generated placeholder, safe to remove). Then drag this repo's
-   `Crank/Resources/Assets.xcassets` folder into the same place in the
-   navigator, "Copy items if needed" checked. That one folder already
-   has the accent color and the app icon correctly nested inside it —
-   one drag, not two, which avoids an asset-catalog mixup. The accent
-   color is what makes buttons, pins, checked notes, and the passcode
-   dots pick up the coral tint automatically; the app icon is what
-   shows on your home screen instead of Xcode's placeholder.
-
-5. **Add a privacy usage description for the camera.** Select the `Crank`
-   target → Info tab → add this row. **It's required** — the app crashes
-   the moment it tries to use the camera without it:
-   - Key: `Privacy - Camera Usage Description` (`NSCameraUsageDescription`)
-     Value: `Crank uses the camera to attach photos to your notes.`
-
-6. **Add microphone permission.** In the same target Info tab, add:
-   - Key: `Privacy - Microphone Usage Description` (`NSMicrophoneUsageDescription`)
-     Value: `Crank uses the microphone to record audio attached to your notes.`
-
-7. **Set the deployment target.** Target → General → Minimum Deployments
-   → iOS 17.0 (required for SwiftData).
-
-8. **Sign the app.** Target → Signing & Capabilities → set your Team to
-   your personal Apple ID. A free Apple ID signs builds for 7 days at a
-   time — just re-run from Xcode once a week to keep it working. A
-   $99/year Apple Developer account signs for a full year instead.
-
-9. **Run it on your phone.** Plug your iPhone into your Mac (or use
-   wireless debugging), select it as the run destination, and hit Run
-   (⌘R). First launch, your iPhone will ask you to trust the developer
-   certificate under Settings → General → VPN & Device Management.
+**Updating CRANK:** use the same signing team and keep the bundle identifier
+`com.adamscourfield.crank` and Swift module name `CRANK`. Those internal names
+are retained deliberately so NOMA updates the existing installation and preserves
+SwiftData model identity. Do not uninstall the app or create a new data store.
+The project and app display names are NOMA.
 
 ## What it does
 
-- **Entry screen**: "CRANK" builds in letter by letter with a coral
+- **Entry screen**: "NOMA" builds in letter by letter with a coral
   underline draw-in (a brief ident, like a production company bumper),
   then crossfades into a 4-digit passcode screen — dot indicators and a
   numeric keypad, matching the rest of the app's design rather than
@@ -146,7 +103,7 @@ built from it.
   once; the note won't reflect later edits made to the original in Drive.
 - No renaming a project after creation, and no reordering projects —
   straightforward to add if you find you want it.
-- No syncing Crank between devices (e.g. an iPhone and a Mac build) —
+- No syncing NOMA between devices (e.g. an iPhone and a Mac build) —
   that would mean either CloudKit (which needs a paid Apple Developer
   account) or building a real local-network sync protocol ourselves;
   deliberately out of scope for a personal, single-device app.
@@ -154,10 +111,10 @@ built from it.
 ## File layout
 
 ```
-Crank/
-  CrankApp.swift                 — app entry point, passcode gate, SwiftData container
+NOMA/
+  NOMAApp.swift                 — app entry point, passcode gate, SwiftData container
   Theme/
-    Color+Crank.swift             — the one accent color token (Color.coral)
+    Color+NOMA.swift             — the one accent color token (Color.coral)
   Audio/
     NoteAudioController.swift                 — microphone, playback, and interruption handling
   Models/
@@ -184,7 +141,7 @@ Crank/
   Resources/
     Assets.xcassets/                             — the one asset catalog; drag this whole folder in, not its children individually
       AccentColor.colorset/                       — the coral accent, light + dark variants
-      AppIcon.appiconset/                           — the home-screen icon (coral, an abstract C/checkmark hybrid)
+      AppIcon.appiconset/                           — the home-screen icon (coral, a rounded N monogram)
 ```
 
 ## Updating an existing installation
@@ -200,3 +157,12 @@ properties or entities and requires no schema migration.
 using the macOS Swift toolchain. Pass a **disposable copy** of `default.store`,
 plus an optional playable audio fixture, to check that existing data opens and
 audio attachment save/read/rename/archive/delete operations preserve its contents.
+
+## Branding
+
+`Branding/noma-icon.svg` is the editable vector master. Regenerate the opaque
+1024px app icon with:
+
+```sh
+xcrun swift Branding/render-icon.swift NOMA/Resources/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png
+```
